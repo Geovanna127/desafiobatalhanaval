@@ -1,0 +1,120 @@
+#include <stdio.h>
+
+#define TAMANHO_TABULEIRO 10
+#define TAMANHO_NAVIO 3
+#define VALOR_NAVIO 3
+#define VALOR_AREA_EFEITO 5
+
+// Função para inicializar o tabuleiro
+void inicializarTabuleiro(int tabuleiro[TAMANHO_TABULEIRO][TAMANHO_TABULEIRO]) {
+    for (int i = 0; i < TAMANHO_TABULEIRO; i++) {
+        for (int j = 0; j < TAMANHO_TABULEIRO; j++) {
+            tabuleiro[i][j] = 0; // Água
+        }
+    }
+}
+
+// Função para posicionar navios horizontais e verticais
+void posicionarNavios(int tabuleiro[TAMANHO_TABULEIRO][TAMANHO_TABULEIRO]) {
+    // Navio Horizontal
+    for (int i = 2; i < 5; i++) {
+        tabuleiro[4][i] = VALOR_NAVIO;
+    }
+    // Navio Vertical
+    for (int i = 3; i < 6; i++) {
+        tabuleiro[i][7] = VALOR_NAVIO;
+    }
+}
+
+// Função para posicionar navios diagonais
+void posicionarNaviosDiagonais(int tabuleiro[TAMANHO_TABULEIRO][TAMANHO_TABULEIRO]) {
+    // Navio Diagonal 1
+    for (int i = 1; i < 4; i++) {
+        tabuleiro[i][i] = VALOR_NAVIO;
+    }
+    // Navio Diagonal 2
+    for (int i = 6; i < 9; i++) {
+        tabuleiro[i][9 - i] = VALOR_NAVIO;
+    }
+}
+
+// Função para mostrar o tabuleiro
+void mostrarTabuleiro(int tabuleiro[TAMANHO_TABULEIRO][TAMANHO_TABULEIRO]) {
+    for (int i = 0; i < TAMANHO_TABULEIRO; i++) {
+        for (int j = 0; j < TAMANHO_TABULEIRO; j++) {
+            printf("%d ", tabuleiro[i][j]);
+        }
+        printf("\n");
+    }
+}
+
+// Função para aplicar a área de efeito (Cone, Cruz, Octaedro)
+void aplicarHabilidade(int tabuleiro[TAMANHO_TABULEIRO][TAMANHO_TABULEIRO], int habilidade[TAMANHO_TABULEIRO][TAMANHO_TABULEIRO], int x, int y, int tipo) {
+    for (int i = 0; i < TAMANHO_TABULEIRO; i++) {
+        for (int j = 0; j < TAMANHO_TABULEIRO; j++) {
+            if (habilidade[i][j] == 1) {
+                if (i + x < TAMANHO_TABULEIRO && j + y < TAMANHO_TABULEIRO) {
+                    tabuleiro[i + x][j + y] = VALOR_AREA_EFEITO;
+                }
+            }
+        }
+    }
+}
+
+// Função para criar a matriz Cone
+void habilidadeCone(int habilidade[TAMANHO_TABULEIRO][TAMANHO_TABULEIRO]) {
+    for (int i = 0; i < TAMANHO_TABULEIRO; i++) {
+        for (int j = 0; j <= i; j++) {
+            habilidade[i][j] = 1;
+        }
+    }
+}
+
+// Função para criar a matriz Cruz
+void habilidadeCruz(int habilidade[TAMANHO_TABULEIRO][TAMANHO_TABULEIRO]) {
+    for (int i = 0; i < TAMANHO_TABULEIRO; i++) {
+        habilidade[i][TAMANHO_TABULEIRO / 2] = 1;
+        habilidade[TAMANHO_TABULEIRO / 2][i] = 1;
+    }
+}
+
+// Função para criar a matriz Octaedro
+void habilidadeOctaedro(int habilidade[TAMANHO_TABULEIRO][TAMANHO_TABULEIRO]) {
+    int meio = TAMANHO_TABULEIRO / 2;
+    for (int i = 0; i < TAMANHO_TABULEIRO; i++) {
+        for (int j = 0; j < TAMANHO_TABULEIRO; j++) {
+            if (abs(i - meio) + abs(j - meio) <= 2) {
+                habilidade[i][j] = 1;
+            }
+        }
+    }
+}
+
+int main() {
+    int tabuleiro[TAMANHO_TABULEIRO][TAMANHO_TABULEIRO];
+    int habilidadeConeMatrix[TAMANHO_TABULEIRO][TAMANHO_TABULEIRO] = {0};
+    int habilidadeCruzMatrix[TAMANHO_TABULEIRO][TAMANHO_TABULEIRO] = {0};
+    int habilidadeOctaedroMatrix[TAMANHO_TABULEIRO][TAMANHO_TABULEIRO] = {0};
+
+    // Inicializar o tabuleiro
+    inicializarTabuleiro(tabuleiro);
+    
+    // Posicionar navios
+    posicionarNavios(tabuleiro);
+    posicionarNaviosDiagonais(tabuleiro);
+
+    // Criar habilidades
+    habilidadeCone(habilidadeConeMatrix);
+    habilidadeCruz(habilidadeCruzMatrix);
+    habilidadeOctaedro(habilidadeOctaedroMatrix);
+
+    // Aplicar habilidades
+    aplicarHabilidade(tabuleiro, habilidadeConeMatrix, 2, 2, 1); // Cone
+    aplicarHabilidade(tabuleiro, habilidadeCruzMatrix, 5, 5, 2); // Cruz
+    aplicarHabilidade(tabuleiro, habilidadeOctaedroMatrix, 3, 3, 3); // Octaedro
+
+    // Exibir o tabuleiro
+    mostrarTabuleiro(tabuleiro);
+
+    return 0;
+}
